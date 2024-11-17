@@ -1,0 +1,14 @@
+/home/USERNAME/LOCALPREFIX.log {
+        daily
+        copytruncate
+	olddir archived_logs
+	rotate -1
+        dateext
+        compress
+	lastaction
+		pday=$(date -d"-1 day" +"%Y%m%d")
+		aday=$(date  +"%Y%m%d")
+		mv /home/USERNAME/archived_logs/LOCALPREFIX.log-$aday.gz /home/USERNAME/archived_logs/LOCALPREFIX.log-$pday.gz
+        endscript
+}
+
