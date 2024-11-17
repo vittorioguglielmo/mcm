@@ -14,10 +14,15 @@ cluster="mi"
 akext=${user_name:(-4)}
 log_local_prefix=$cluster$akext
 
+installa_log() {
 [[ -d /home/$user_name/archived_logs ]] || sudo mkdir /home/$user_name/archived_logs
-sudo cp etc/logrotate_USERNAME_conf /etc/logrotate_"$user_name"_conf
+if [ ! -f etc/logrotate_"$user_name"_conf ]; then
+wget https://github.com/vittorioguglielmo/mcm/raw/refs/heads/main/logrotate_USERNAME_conf -O logrotate_USERNAME_conf
+sudo cp logrotate_USERNAME_conf /etc/logrotate_"$user_name"_conf
 sudo sed -i "s/USERNAME/$user_name/g" /etc/logrotate_"$user_name"_conf
 sudo sed -i "s/LOCALPREFIX/$log_local_prefix/g" /etc/logrotate_"$user_name"_conf
+fi
+}
 
 
 installa_crontab() {
@@ -30,6 +35,7 @@ fi
 #SOSTITUISCO PLACEHOLDER con utente in sudoers e copio il file
 sudo sh -c "echo '$user_name ALL=(ALL:ALL) NOPASSWD: ALL' > /etc/sudoers.d/dont-prompt-localuser-for-pwd"
 installa_crontab
+installa_log
 exit 0
 
 installa_rustdesk() {
