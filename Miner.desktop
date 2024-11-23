@@ -1,0 +1,4 @@
+[Desktop Entry]
+Type=Application
+Name=<Name of application as displayed>
+Exec=xfce4-terminal --maximize -e 'bash -c "sudo bash parallelStarter.sh; bash"' -T "Miner" -T "Miner"

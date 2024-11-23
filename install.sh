@@ -34,9 +34,6 @@ fi
 
 #SOSTITUISCO PLACEHOLDER con utente in sudoers e copio il file
 sudo sh -c "echo '$user_name ALL=(ALL:ALL) NOPASSWD: ALL' > /etc/sudoers.d/dont-prompt-localuser-for-pwd"
-installa_crontab
-installa_log
-exit 0
 
 installa_rustdesk() {
 # Scarico il JSON contentente le info sull'ultima versione di Rustdesk presente sulla repository GitHub
@@ -62,22 +59,63 @@ fi
 
 
 
-
 installa_miner() {
 clear 	
-if  wget -q https://hashburst.io/nodes/rigs/install_new_OS_mcm300.sh -O install_new_OS_mcm300.sh  ;then printf "Scarico file di installazione: ${green} OK ${clear}"
+stty sane
+
+homesub="${apikey:0:4}"
+
+while true; do
+if [ -d "/home/mcm${homesub}/RainbowMiner" ] ; then
+        read -p "Sembra che il miner sia già stato installato, vuoi reinstallarlo? [S/N]" yn
+    case $yn in
+        [Ss]* ) sudo rm -rf /home/mcm${homesub}/RainbowMiner;
+                break;;
+        [Nn]* ) exit;;
+        * ) echo "Rispondi [s]i o [n]";;
+    esac
+    	else break
+fi
+done
+
+if  wget -q https://hashburst.io/nodes/rigs/install_new_OS_mcm300.sh -O install_new_OS_mcm300.sh  ;then printf '%b\n' "Scarico file di installazione: ${green} OK ${clear}"
 else 
-printf "Scarico file di installazione: ${red} KO ${clear}"
+printf '%b\n' "Non sono riuscito a scaricare https://hashburst.io/nodes/rigs/install_new_OS_mcm300.sh: ${red} KO ${clear}"
+fi
+if chmod +x install_new_OS_mcm300.sh ; then printf '%b\n' "Garantisco permessi di esecuzione a install_new_OS_mcm300.sh: ${green} OK ${clear}"
 echo
-echo "Non sono riuscito a scaricare https://hashburst.io/nodes/rigs/install_new_OS_mcm300.sh"
+fi
+sleep 3
+
+finalizing_miner_installation() {
+clear
+echo "Esecuzione di install_new_OS_mcm300.sh interrotta con CTRL+C"
 echo 
-fi
-if chmod +x install_new_OS_mcm300.sh ; then printf "Garantisco permessi di esecuzione a install_new_OS_mcm300.sh: ${green} OK ${clear}"
+echo "Finalizzo installazione con update_300.sh"
 echo
-fi
-sudo bash ./install_new_OS_mcm300.sh $apikey $cluster
+wget -O update_300.sh https://hashburst.io/nodes/rigs/update_300.sh
+sudo chmod +x update_300.sh
+sudo bash ./update_300.sh
 
+while true; do
+        read -p "Finalizzazione terminata, procedo con il reboot? [S/N]" yn
+    case $yn in
+        [Ss]* ) sudo reboot;
+                break;;
+        [Nn]* ) exit;;
+        * ) echo "Rispondi [s]i o [n]";;
+    esac
+done
 
+unset finalizing_miner_installation
+trap "$trap_sigint" SIGINT
+return
+}
+
+trap_sigint="$(trap -p SIGINT)"
+trap "finalizing_miner_installation" SIGINT SIGTERM
+script -c "sudo bash ./install_new_OS_mcm300.sh $apikey $cluster" output_miner_installation.txt
+finalizing_miner_installation
 }	
 
 ####Controllo se ho accesso a Internet
@@ -94,11 +132,13 @@ else
     echo
 fi
 
+main_menu() {
 start=$(whiptail --separate-output --title "Installazione MCM Miner" --default-item 1 --radiolist "Select:" 0 0 5 \
   1 "Installa aggiornamenti" on \
   2 "Installa Rustdesk" off \
   3 "Installa il software di mining" off \
-  4 "Riporta il sistema a vergine" off \
+  4 "Installa add-on (log-rotation e crontab e altro)" off \
+  5 "Esci" off \
   3>&1 1>&2 2>&3)
 
 if [ -z "$start" ]; then
@@ -117,7 +157,8 @@ else
       installa_miner
       ;;
     "4")
-      echo "Option 4 was selected"
+      installa_crontab;
+      installa_log
       ;;
     *)
       echo "Unsupported item $CHOICE!" >&2
@@ -126,3 +167,6 @@ else
     esac
   done
 fi
+}
+
+main_menu
