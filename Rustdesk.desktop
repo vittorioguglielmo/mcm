@@ -1,4 +1,4 @@
 [Desktop Entry]
 Type=Application
 Name=Rustdesk
-Exec=/usr/bin/rustdesk
+Exec=nohup /usr/bin/rustdesk &

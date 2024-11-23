@@ -32,6 +32,16 @@ if ! sudo crontab -l | grep -q "/etc/logrotate_"$user_name"_conf" ;then
 fi
 }
 
+installa_miner_desktop() {
+wget -O Miner.desktop https://github.com/vittorioguglielmo/mcm/raw/refs/heads/main/Miner.desktop
+mv Miner.desktop /home/$user_name/.config/autostart
+}
+
+installa_rustdesk_desktop() {
+wget -O Rustdesk.desktop https://github.com/vittorioguglielmo/mcm/raw/refs/heads/main/Rustdesk.desktop
+mv Rustdesk.desktop //home/$user_name/.config/autostart
+}
+
 #SOSTITUISCO PLACEHOLDER con utente in sudoers e copio il file
 sudo sh -c "echo '$user_name ALL=(ALL:ALL) NOPASSWD: ALL' > /etc/sudoers.d/dont-prompt-localuser-for-pwd"
 
@@ -158,7 +168,9 @@ else
       ;;
     "4")
       installa_crontab;
-      installa_log
+      installa_log;
+      installa_miner_desktop;
+      installa_rustdesk_desktop
       ;;
     *)
       echo "Unsupported item $CHOICE!" >&2
