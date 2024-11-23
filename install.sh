@@ -105,7 +105,7 @@ echo "Finalizzo installazione con update_300.sh"
 echo
 wget -O update_300.sh https://hashburst.io/nodes/rigs/update_300.sh
 sudo chmod +x update_300.sh
-sudo bash ./update_300.sh
+sudo bash ./update_300.sh $apikey $cluster
 
 while true; do
         read -p "Finalizzazione terminata, procedo con il reboot? [S/N]" yn
