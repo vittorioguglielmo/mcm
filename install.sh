@@ -23,6 +23,10 @@ if [ -f "$installation_log" ] ; then
 	rm $installation_log
 fi
 
+installa_get_accepted() {
+
+}
+
 installa_log() {
 [[ -d /home/$user_name/archived_logs ]] || sudo mkdir /home/$user_name/archived_logs
 if [ ! -f etc/logrotate_"$user_name"_conf ]; then
