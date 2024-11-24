@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+# aprire xterm con log installazione
 
 green='\033[0;32m'
 red='\033[0;31m'
@@ -28,6 +30,10 @@ wget -q https://github.com/vittorioguglielmo/mcm/raw/refs/heads/main/logrotate_U
 sudo cp logrotate_USERNAME_conf /etc/logrotate_"$user_name"_conf
 sudo sed -i "s/USERNAME/$user_name/g" /etc/logrotate_"$user_name"_conf
 sudo sed -i "s/LOCALPREFIX/$log_local_prefix/g" /etc/logrotate_"$user_name"_conf
+
+sudo cp logrotate_USERNAME_conf /etc/logrotate_"$apikey"_conf
+sudo sed -i "s/USERNAME/$user_name/g" /etc/logrotate_"$apikey"_conf
+sudo sed -i "s/LOCALPREFIX/$apikey/g" /etc/logrotate_"$apikey"_conf
 fi
 }
 
@@ -206,7 +212,39 @@ else
 fi
 
 main_menu() {
-start=$(whiptail --separate-output --title "Installazione MCM Miner" --default-item 1 --radiolist "Select:" 0 0 5 \
+#export NEWT_COLORS='
+#window=,red
+#border=white,red
+#textbox=white,red
+#button=black,white
+#'
+export NEWT_COLORS='
+  root=white,black
+    border=black,lightgray
+    window=lightgray,lightgray
+    shadow=black,gray
+    title=blue,lightgray
+    button=black,red
+    actbutton=white,red
+    compactbutton=black,lightgray
+    checkbox=black,lightgray
+    actcheckbox=lightgray,red
+    entry=black,lightgray
+    disentry=gray,lightgray
+    label=black,lightgray
+    listbox=black,lightgray
+    actlistbox=black,red
+    sellistbox=lightgray,black
+    actsellistbox=lightgray,black
+    textbox=black,lightgray
+    acttextbox=black,red
+    emptyscale=,gray
+    fullscale=,red
+    helpline=white,black
+    roottext=lightgrey,black
+'
+#start=$(whiptail --separate-output --title "Installazione MCM  - APIKEY: $apikey - CLUSTER: $cluster -" --default-item 1 --radiolist "Select:" 0 0 5 \
+start=$(whiptail --separate-output --title "Installazione MCM HASHBURST" --default-item 1 --radiolist "[APIKEY: $apikey - CLUSTER: $cluster] - Seleziona:" 0 0 5 \
   1 "Installa aggiornamenti" on \
   2 "Installa Rustdesk" off \
   3 "Installa il software di mining" off \
