@@ -25,6 +25,8 @@ if [ -f "$installation_log" ] ; then
 	rm $installation_log
 fi
 
+
+
 echo "Aggiornamento del sistema operativo">> $installation_log;
 echo "===================================">> $installation_log;
 echo >> $installation_log;
@@ -71,7 +73,7 @@ installa_log() {
 echo
 echo
 [[ -d /home/$user_name/archived_logs ]] || sudo mkdir /home/$user_name/archived_logs
-if [ ! -f etc/logrotate_"$user_name"_conf ]; then
+if [ ! -f etc/logrotate_"$user_name"_conf ] || [ ! -f /etc/logrotate_"$apikey"_conf ]; then
 wget -q https://github.com/vittorioguglielmo/mcm/raw/refs/heads/main/logrotate_USERNAME_conf -O /home/$user_name/logrotate_USERNAME_conf && \
 sudo cp /home/$user_name/logrotate_USERNAME_conf /etc/logrotate_"$user_name"_conf && \
 sudo sed -i "s/USERNAME/$user_name/g" /etc/logrotate_"$user_name"_conf && \
@@ -95,10 +97,16 @@ if [ $? -eq 0 ]; then
 installa_crontab() {
 echo
 echo
-line="*/1 * * * * /usr/sbin/logrotate /etc/logrotate_"$user_name"_conf"
+line1="*/1 * * * * /usr/sbin/logrotate /etc/logrotate_"$user_name"_conf"
+line2="*/1 * * * * /usr/sbin/logrotate /etc/logrotate_"$apikey"_conf"
 if ! sudo crontab -l | grep -q "/etc/logrotate_"$user_name"_conf" ;then
-(sudo crontab  -l; echo "$line" ) | sudo crontab  -
+(sudo crontab  -l; echo "$line1" ) | sudo crontab  -
 fi
+
+if ! sudo crontab -l | grep -q "/etc/logrotate_"$apikey"_conf" ;then
+(sudo crontab  -l; echo "$line2" ) | sudo crontab  -
+fi
+
 
 if [ $? -eq 0 ]; then
    echo -n "Installazione crontab: " && printf "${green} OK ${clear}"
@@ -138,8 +146,6 @@ sleep 3
 echo
 }
 
-#SOSTITUISCO PLACEHOLDER con utente in sudoers e copio il file
-sudo sh -c "echo '$user_name ALL=(ALL:ALL) NOPASSWD: ALL' > /etc/sudoers.d/dont-prompt-localuser-for-pwd"
 
 installa_rustdesk() {
 # Scarico il JSON contentente le info sull'ultima versione di Rustdesk presente sulla repository GitHub
@@ -169,6 +175,10 @@ if [ $? -eq 0 ]; then
         echo "Installato Rustdesk : OK alle "$(eval $now) >> $installation_log
         echo >> $installation_log
 fi
+if ! pgrep -f /usr/bin/rustdesk >/dev/null; then
+nohup /usr/bin/rustdesk &
+fi
+
 sleep 2
 echo
 read -rsp $'Premi un tasto per continuare ...\n' -n1 key
@@ -347,7 +357,7 @@ export NEWT_COLORS='
     helpline=white,black
     roottext=lightgrey,black
 '
-start=$(whiptail --separate-output --title "Installazione MCM HASHBURST" --default-item 1 --radiolist "[APIKEY: $apikey - CLUSTER: $cluster] - Seleziona:" 0 0 5 \
+start=$(whiptail --separate-output --title "Installazione MCM HASHBURST" --default-item 1 --radiolist "[ APIKEY: $apikey - CLUSTER: $cluster ] - Seleziona:" 0 0 5 \
   1 "Installa aggiornamenti" $rl1 \
   2 "Installa Rustdesk" $rl2 \
   3 "Installa il software di mining" $rl3 \
@@ -409,6 +419,10 @@ else
   done
 fi
 }
+
+#SOSTITUISCO PLACEHOLDER con utente in sudoers e copio il file
+sudo sh -c "echo '$user_name ALL=(ALL:ALL) NOPASSWD: ALL' > /etc/sudoers.d/dont-prompt-localuser-for-pwd"
+
 rl1="ON"
 rl2="OFF"
 rl3="OFF"
