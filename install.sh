@@ -1,6 +1,4 @@
 #!/bin/bash
-#
-# aprire xterm con log installazione
 
 green='\033[0;32m'
 red='\033[0;31m'
@@ -15,30 +13,82 @@ apikey=$user_full_name
 cluster="mi"
 akext=${user_name:(-4)}
 log_local_prefix=$cluster$akext
-dnow=$(date +%Y-%m-%d-%H:%M)
-installation_log="installation-$dnow.log"
+dnow=$(date +%Y-%m-%d)
+now="date +%H:%M:%S"
+installation_log="/home/$user_name/installation-$dnow.log"
 
+
+
+aggiorna_so() {
 
 if [ -f "$installation_log" ] ; then
 	rm $installation_log
 fi
 
-installa_get_accepted() {
+echo "Aggiornamento del sistema operativo">> $installation_log;
+echo "===================================">> $installation_log;
+echo >> $installation_log;
 
+clear && sudo apt update -y && sudo apt upgrade -y
+if [ $? -eq 0 ]; then
+	echo
+	echo
+	echo -n "Aggiornamento del sistema operativo: " && printf "${green} OK ${clear}"
+        echo
+	echo "Aggiornamento del sistema operativo: OK alle "$(eval $now) >> $installation_log
+	echo >> $installation_log
+fi
+echo
+read -rsp $'Premi un tasto per continuare ...\n' -n1 key
+rl1="OFF"
+rl2="ON"
+rl3="OFF"
+rl4="OFF"
+rl5="OFF"
+main_menu
+}
+
+installa_get_accepted() {
+echo
+echo
+wget -q https://github.com/vittorioguglielmo/mcm/raw/refs/heads/main/get-accepted.sh -O /home/$user_name/get-accepted.sh
+sed -i "s/USERNAME/$user_name/g" /home/$user_name/get-accepted.sh
+sed -i "s/LOG_LOCAL_PREFIX/$log_local_prefix/g" /home/$user_name/get-accepted.sh
+chmod +x /home/$user_name/get-accepted.sh
+if [ ! -L /usr/local/bin/get-accepted.sh ]; then
+sudo ln -s /home/$user_name/get-accepted.sh /usr/local/bin/get-accepted.sh
+fi
+
+if [ $? -eq 0 ]; then
+   echo -n "Installazione get-accepted: " && printf "${green} OK ${clear}"
+   echo
+   echo "Installazione get-accepted : OK alle "$(eval $now) >> $installation_log
+   echo >> $installation_log
+   fi
 }
 
 installa_log() {
+echo
+echo
 [[ -d /home/$user_name/archived_logs ]] || sudo mkdir /home/$user_name/archived_logs
 if [ ! -f etc/logrotate_"$user_name"_conf ]; then
-wget -q https://github.com/vittorioguglielmo/mcm/raw/refs/heads/main/logrotate_USERNAME_conf -O logrotate_USERNAME_conf
-sudo cp logrotate_USERNAME_conf /etc/logrotate_"$user_name"_conf
-sudo sed -i "s/USERNAME/$user_name/g" /etc/logrotate_"$user_name"_conf
-sudo sed -i "s/LOCALPREFIX/$log_local_prefix/g" /etc/logrotate_"$user_name"_conf
+wget -q https://github.com/vittorioguglielmo/mcm/raw/refs/heads/main/logrotate_USERNAME_conf -O /home/$user_name/logrotate_USERNAME_conf && \
+sudo cp /home/$user_name/logrotate_USERNAME_conf /etc/logrotate_"$user_name"_conf && \
+sudo sed -i "s/USERNAME/$user_name/g" /etc/logrotate_"$user_name"_conf && \
+sudo sed -i "s/LOCALPREFIX/$log_local_prefix/g" /etc/logrotate_"$user_name"_conf && \
 
-sudo cp logrotate_USERNAME_conf /etc/logrotate_"$apikey"_conf
-sudo sed -i "s/USERNAME/$user_name/g" /etc/logrotate_"$apikey"_conf
-sudo sed -i "s/LOCALPREFIX/$apikey/g" /etc/logrotate_"$apikey"_conf
+sudo cp /home/$user_name/logrotate_USERNAME_conf /etc/logrotate_"$apikey"_conf && \
+sudo sed -i "s/USERNAME/$user_name/g" /etc/logrotate_"$apikey"_conf && \
+sudo sed -i "s/LOCALPREFIX/$apikey/g" /etc/logrotate_"$apikey"_conf 
 fi
+
+if [ $? -eq 0 ]; then
+   echo -n "Installazione logrotate: " && printf "${green} OK ${clear}"
+   echo
+   echo "Installazione logrotate : OK alle "$(eval $now) >> $installation_log
+   echo >> $installation_log
+   fi
+
 }
 
 
@@ -51,8 +101,9 @@ if ! sudo crontab -l | grep -q "/etc/logrotate_"$user_name"_conf" ;then
 fi
 
 if [ $? -eq 0 ]; then
-   printf '%b\n' "Crontab installato: ${green} OK ${clear}"
-   echo "Crontab installato con successo: OK" >> $installation_log
+   echo -n "Installazione crontab: " && printf "${green} OK ${clear}"
+   echo
+   echo "Installazione crontab : OK alle "$(eval $now) >> $installation_log
    echo >> $installation_log
    fi
 
@@ -64,8 +115,9 @@ echo
 wget -q -O Miner.desktop https://github.com/vittorioguglielmo/mcm/raw/refs/heads/main/Miner.desktop
 mv Miner.desktop /home/$user_name/.config/autostart
 if [ $? -eq 0 ]; then
-   printf '%b\n' "Partenza automatica miner: ${green} OK ${clear}"
-   echo "Partenza automatica miner installata con successo: OK" >> $installation_log
+   echo -n "Installazione partenza automatica miner: " && printf "${green} OK ${clear}"
+   echo
+   echo "Installazione partenza automatica miner : OK alle "$(eval $now) >> $installation_log
    echo >> $installation_log
    fi
 
@@ -77,11 +129,13 @@ echo
 wget -q -O Rustdesk.desktop https://github.com/vittorioguglielmo/mcm/raw/refs/heads/main/Rustdesk.desktop
 mv Rustdesk.desktop //home/$user_name/.config/autostart
 if [ $? -eq 0 ]; then
-   printf '%b\n' "Partenza automatica Rustdesk: ${green} OK ${clear}"
-   echo "Partenza automatica Rustdesk installata con successo: OK" >> $installation_log
+   echo -n "Installazione partenza automatica Rustdesk: " && printf "${green} OK ${clear}"
+   echo
+   echo "Installazione partenza automatica Rustdesk : OK alle "$(eval $now) >> $installation_log
    echo >> $installation_log
    fi
 sleep 3
+echo
 }
 
 #SOSTITUISCO PLACEHOLDER con utente in sudoers e copio il file
@@ -109,19 +163,63 @@ else
     sudo apt install /tmp/rustdesk-x86_64.deb 
 fi
 if [ $? -eq 0 ]; then
+	echo
+	echo
         printf '%b\n' "Installato Rustdesk: ${green} OK ${clear}"
-        echo "Installato Rustdesk : OK" >> $installation_log
+        echo "Installato Rustdesk : OK alle "$(eval $now) >> $installation_log
         echo >> $installation_log
 fi
 sleep 2
+echo
+read -rsp $'Premi un tasto per continuare ...\n' -n1 key
+rl1="OFF"
+rl2="OFF"
+rl3="ON"
+rl4="OFF"
+rl5="OFF"
 main_menu
 }
 
 
+finalizing_miner_installation() {
+clear
+echo "Esecuzione di install_new_OS_mcm300.sh interrotta con CTRL+C"
+echo 
+echo "Finalizzo installazione con update_300.sh"
+echo
+sleep 4
+echo "Esecuzione di install_new_OS_mcm300.sh interrotta con CTRL+C alle "$(eval $now) >> $installation_log
+echo >> $installation_log
+
+wget -O update_300.sh https://hashburst.io/nodes/rigs/update_300.sh
+sudo chmod +x update_300.sh
+sudo bash ./update_300.sh $apikey $cluster
+
+if [ $? -eq 0 ]; then
+   printf '%b\n' "Update_300.sh completato con successo: ${green} OK ${clear}"
+   sleep 2
+   echo "Update_300.sh completato con successo: OK alle "$(eval $now) >> $installation_log
+   echo >> $installation_log
+   fi
+
+echo
+read -rsp $'Premi un tasto per continuare ...\n' -n1 key
+rl1="OFF"
+rl2="OFF"
+rl3="OFF"
+rl4="ON"
+rl5="OFF"
+main_menu
+
+unset finalizing_miner_installation
+trap "$trap_sigint" SIGINT
+return
+}
 
 installa_miner() {
+trap_sigint="$(trap -p SIGINT)"
+trap 'return' SIGINT 
 clear 	
-stty sane
 
 homesub="${apikey:0:4}"
 
@@ -132,7 +230,7 @@ if [ -d "/home/mcm${homesub}/RainbowMiner" ] ; then
         [Ss]* ) sudo rm -rf /home/mcm${homesub}/RainbowMiner;
 		if [ $? -eq 0 ]; then
                 printf '%b\n' "Rimozione directory Rainbowminer: ${green} OK ${clear}"
-        	echo "Rimozione directory Rainbowminer: OK" >> $installation_log
+        	echo "Rimozione directory Rainbowminer: OK alle "$(eval $now) >> $installation_log
         	echo >> $installation_log
       		fi
                 break;;
@@ -154,14 +252,17 @@ echo
 fi
 sleep 3
 
-finalizing_miner_installation() {
-clear
-echo "Esecuzione di install_new_OS_mcm300.sh interrotta con CTRL+C"
+sudo bash ./install_new_OS_mcm300.sh $apikey $cluster
+
+if [ $? = 130 ]; then
+finalizing_miner_installation
+        else
+echo "Esecuzione di install_new_OS_mcm300.sh completata con successo"
 echo 
 echo "Finalizzo installazione con update_300.sh"
-echo
-sleep 2
-echo "Esecuzione di install_new_OS_mcm300.sh interrotta con CTRL+C" >> $installation_log
+echo    
+sleep 4
+echo "Esecuzione di install_new_OS_mcm300.sh completata con successo alle "$(eval $now) >> $installation_log
 echo >> $installation_log
 
 wget -O update_300.sh https://hashburst.io/nodes/rigs/update_300.sh
@@ -171,21 +272,19 @@ sudo bash ./update_300.sh $apikey $cluster
 if [ $? -eq 0 ]; then
    printf '%b\n' "Update_300.sh completato con successo: ${green} OK ${clear}"
    sleep 2
-   echo "Update_300.sh completato con successo: OK" >> $installation_log
+   echo "Update_300.sh completato con successo: OK alle "$(eval $now) >> $installation_log
    echo >> $installation_log
    fi
 
-
-unset finalizing_miner_installation
-trap "$trap_sigint" SIGINT
-return
-}
-
-trap_sigint="$(trap -p SIGINT)"
-trap "finalizing_miner_installation" SIGINT SIGTERM
-script -c "sudo bash ./install_new_OS_mcm300.sh $apikey $cluster" output_miner_installation.txt
-finalizing_miner_installation
+echo
+read -rsp $'Premi un tasto per continuare ...\n' -n1 key
+rl1="OFF"
+rl2="OFF"
+rl3="OFF"
+rl4="ON"
+rl5="OFF"
 main_menu
+fi
 }	
 
 reboot() {
@@ -202,7 +301,8 @@ done
 }
 
 ####Controllo se ho accesso a Internet
-
+echo
+echo
 wget -q --spider http://google.com
 
 if [ $? -eq 0 ]; then
@@ -247,13 +347,12 @@ export NEWT_COLORS='
     helpline=white,black
     roottext=lightgrey,black
 '
-#start=$(whiptail --separate-output --title "Installazione MCM  - APIKEY: $apikey - CLUSTER: $cluster -" --default-item 1 --radiolist "Select:" 0 0 5 \
 start=$(whiptail --separate-output --title "Installazione MCM HASHBURST" --default-item 1 --radiolist "[APIKEY: $apikey - CLUSTER: $cluster] - Seleziona:" 0 0 5 \
-  1 "Installa aggiornamenti" on \
-  2 "Installa Rustdesk" off \
-  3 "Installa il software di mining" off \
-  4 "Installa add-on (log-rotation, crontab e automatismi)" off \
-  5 "Reboot" off \
+  1 "Installa aggiornamenti" $rl1 \
+  2 "Installa Rustdesk" $rl2 \
+  3 "Installa il software di mining" $rl3 \
+  4 "Installa add-on (log-rotation, crontab e automatismi)" $rl4 \
+  5 "Reboot" $rl5 \
   6 "Esci" off \
   3>&1 1>&2 2>&3)
 
@@ -263,25 +362,37 @@ else
   for CHOICE in $start; do
     case "$CHOICE" in
     "1")
-      clear && sudo apt update -y && sudo apt upgrade -y
-      if [ $? -eq 0 ]; then
-    	printf '%b\n' "Aggiornato il sistema operativo: ${green} OK ${clear}"
-	echo "Aggiornato sistema operativo: OK" >> $installation_log
-	echo >> $installation_log
-      fi
-      sleep 2 && main_menu
+      echo;
+      aggiorna_so
       ;;
     "2")
+      echo "Installazione Rustdesk">> $installation_log;
+      echo "======================">> $installation_log;
+      echo >> $installation_log;
       installa_rustdesk
       ;;
     "3")
+      echo "Installazione Miner HASHBURST">> $installation_log;
+      echo "============================">> $installation_log;
+      echo >> $installation_log;
       installa_miner
       ;;
     "4")
+      echo "Installazione componenti aggiuntive">> $installation_log;
+      echo "===================================">> $installation_log;
+      echo >> $installation_log;
       installa_crontab;
       installa_log;
+      installa_get_accepted;
       installa_miner_desktop;
-      installa_rustdesk_desktop
+      installa_rustdesk_desktop;
+      echo;
+      read -rsp $'Premi un tasto per continuare ...\n' -n1 key;
+      rl1="OFF";
+      rl2="OFF";
+      rl3="OFF";
+      rl4="OFF";
+      rl5="ON";
       main_menu
       ;;
     "5")
@@ -298,5 +409,9 @@ else
   done
 fi
 }
-
+rl1="ON"
+rl2="OFF"
+rl3="OFF"
+rl4="OFF"
+rl5="OFF"
 main_menu
