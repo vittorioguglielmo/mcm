@@ -7,7 +7,7 @@ estrai() {
 while [[ $start -le $end ]]
 do
         day=$(date -d $start +%Y-%m-%d)
-	accepted=$($command $log_path/LOG_LOCAL_PREFIX.log$log_suffix |grep -i Accepted|grep "S"|wc -l)
+	accepted=$($command $log_path/LOG_LOCAL_PREFIX.log$log_suffix |grep -a -i Accepted|grep "S"|wc -l)
 
 if [ "$accepted" != "" ]; then
 	#difference=$(($last-$first))
