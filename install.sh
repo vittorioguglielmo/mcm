@@ -394,7 +394,7 @@ else
       installa_crontab;
       installa_log;
       installa_get_accepted;
-      installa_miner_desktop;
+#      installa_miner_desktop;
       installa_rustdesk_desktop;
       echo;
       read -rsp $'Premi un tasto per continuare ...\n' -n1 key;
