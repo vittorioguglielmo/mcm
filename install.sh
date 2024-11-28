@@ -162,11 +162,11 @@ if [ -z "$DOWNLOAD_URL" ]; then
     echo "Procedo con la versione di Rustdesk 1.3.2"
     sleep 6
     wget https://github.com/rustdesk/rustdesk/releases/download/1.3.2/rustdesk-1.3.2-x86_64.deb -O /tmp/rustdesk-1.3.2-x86_64.deb
-    sudo apt install /tmp/rustdesk-1.3.2-x86_64.deb
+    sudo apt install -y /tmp/rustdesk-1.3.2-x86_64.deb
 else
     # Scarico Rustdesk con il link precedentemente generato 
     wget $DOWNLOAD_URL -O /tmp/rustdesk-x86_64.deb
-    sudo apt install /tmp/rustdesk-x86_64.deb 
+    sudo apt install -y /tmp/rustdesk-x86_64.deb 
 fi
 if [ $? -eq 0 ]; then
 	echo
