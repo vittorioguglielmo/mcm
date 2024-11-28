@@ -175,9 +175,9 @@ if [ $? -eq 0 ]; then
         echo "Installato Rustdesk : OK alle "$(eval $now) >> $installation_log
         echo >> $installation_log
 fi
-if ! pgrep -f /usr/bin/rustdesk >/dev/null; then
-nohup /usr/bin/rustdesk &
-fi
+#if ! pgrep -f /usr/bin/rustdesk >/dev/null; then
+bash -c "nohup /usr/bin/rustdesk &"
+#fi
 
 sleep 2
 echo
