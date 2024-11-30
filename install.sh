@@ -97,8 +97,8 @@ if [ $? -eq 0 ]; then
 installa_crontab() {
 echo
 echo
-line1="*/1 * * * * /usr/sbin/logrotate /etc/logrotate_"$user_name"_conf"
-line2="*/1 * * * * /usr/sbin/logrotate /etc/logrotate_"$apikey"_conf"
+line1="0 0 * * * /usr/sbin/logrotate /etc/logrotate_"$user_name"_conf"
+line2="0 0 * * * /usr/sbin/logrotate /etc/logrotate_"$apikey"_conf"
 if ! sudo crontab -l | grep -q "/etc/logrotate_"$user_name"_conf" ;then
 (sudo crontab  -l; echo "$line1" ) | sudo crontab  -
 fi
